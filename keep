@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KEEP | ROOM SAVER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #000; color: #fff; letter-spacing: -0.05em; overflow-x: hidden; }
+        .accent-red { color: #C80000; }
+        .bg-accent-red { background-color: #C80000; }
+        .hero-title { font-size: clamp(3rem, 12vw, 8rem); line-height: 0.85; font-weight: 900; font-style: italic; }
+        .glass-panel { background: rgba(20, 20, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.5s ease; }
+        .payment-card { background: #0f0f0f; border: 2px solid #C80000; box-shadow: 0 40px 100px rgba(200, 0, 0, 0.2); }
+        .cta-btn { transition: opacity 0.6s ease, transform 0.6s ease; opacity: 1; }
+        .cta-btn.hide-away { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+        .dimmed-zone { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
+        .occupied { background: #050505 !important; color: #222 !important; border: 1px solid #111 !important; cursor: not-allowed; pointer-events: none; }
+        .selected { border-color: #C80000; background: rgba(200, 0, 0, 0.25); box-shadow: 0 0 30px rgba(200, 0, 0, 0.5); transform: scale(1.05); }
+        .size-a { width: 55px; height: 55px; font-size: 9px; }    
+        .size-b { width: 115px; height: 95px; font-size: 11px; } 
+        .size-c { width: 195px; height: 235px; font-size: 15px; } 
+        .sticky-confirm-wrap { position: sticky; bottom: 150px; z-index: 100; display: flex; justify-content: flex-end; pointer-events: none; margin-top: -60px; }
+        .btn-confirm-sticky { pointer-events: auto; opacity: 0; transform: translateY(20px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-confirm-sticky.show { opacity: 1; transform: translateY(0); }
+        .step-active { color: #C80000; font-weight: 900; opacity: 1 !important; }
+        section { padding-top: 140px; padding-bottom: 140px; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="fixed top-0 w-full z-[200] px-10 py-8 flex justify-between items-center mix-blend-difference">
+        <div class="text-2xl font-black tracking-tighter italic uppercase">KEEP<span class="accent-red">.</span></div>
+        <div class="hidden md:flex space-x-10 text-[10px] uppercase tracking-[0.4em] font-bold opacity-50">
+            <a href="#about" class="smooth-scroll hover:opacity-100 transition">About</a>
+            <a href="#monitor" class="smooth-scroll hover:opacity-100 transition">Live</a>
+            <a href="#reserve" class="smooth-scroll hover:opacity-100 transition">Booking</a>
+        </div>
+        <a href="#reserve" id="navBookingBtn" class="smooth-scroll cta-btn bg-white text-black px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-700 hover:text-white transition-all">Start Booking</a>
+    </nav>
+
+    <header id="about" class="h-screen flex flex-col justify-center px-8 md:px-20 max-w-7xl mx-auto">
+        <p class="text-[10px] uppercase tracking-[0.6em] font-bold opacity-30 mb-6">Shingwan-dong Smart Storage</p>
+        <h1 class="hero-title tracking-tighter uppercase mb-10">ROOM SAVER,<br><span class="accent-red">KEEP.</span></h1>
+        <div class="max-w-xl border-l-2 border-red-900 pl-8 mb-12">
+            <p class="text-2xl font-bold opacity-90 mb-4 tracking-tight">비좁은 자취방의 한계를 넘다.</p>
+            <p class="text-sm opacity-40 leading-relaxed font-medium">공주대 학생들을 위해 설계된 최적의 항온·항습 스마트 보관함 서비스를 경험하세요.</p>
+        </div>
+        <a href="#reserve" id="heroBookingBtn" class="smooth-scroll cta-btn inline-flex items-center bg-accent-red text-white w-fit px-12 py-5 font-black text-sm uppercase tracking-widest hover:brightness-125 transition-all shadow-2xl shadow-red-900/30">
+            지금 보관함 예약하기 <i class="fa-solid fa-arrow-down ml-4"></i>
+        </a>
+    </header>
+
+    <section id="monitor" class="px-8 md:px-20 bg-[#030303] border-y border-white/5">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+            <div>
+                <h2 class="text-4xl font-black italic uppercase tracking-tighter mb-6">Live Status</h2>
+                <div class="flex gap-4">
+                    <div class="glass-panel p-8 rounded-2xl flex-1 text-center">
+                        <span class="text-[10px] font-bold opacity-30 uppercase">Temp</span>
+                        <p class="text-4xl font-black accent-red mt-2" id="tempDisp">22.4°</p>
+                    </div>
+                    <div class="glass-panel p-8 rounded-2xl flex-1 text-center">
+                        <span class="text-[10px] font-bold opacity-30 uppercase">Humi</span>
+                        <p class="text-4xl font-black accent-red mt-2" id="humiDisp">42%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="relative glass-panel aspect-video flex items-center justify-center rounded-3xl border-red-900/20 overflow-hidden">
+                <i class="fa-solid fa-qrcode text-9xl opacity-5"></i>
+            </div>
+        </div>
+    </section>
+
+    <section id="reserve" class="px-8 md:px-20 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">01. Category</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button onclick="nextStep(1, 2, this)" class="glass-panel p-16 text-left rounded-3xl group">
+                <i class="fa-solid fa-camera-retro text-3xl mb-8 opacity-20 group-hover:accent-red"></i>
+                <h3 class="text-2xl font-bold mb-2">영상/촬영 장비</h3>
+            </button>
+            <button onclick="nextStep(1, 2, this)" class="glass-panel p-16 text-left rounded-3xl group">
+                <i class="fa-solid fa-shirt text-3xl mb-8 opacity-20 group-hover:accent-red"></i>
+                <h3 class="text-2xl font-bold mb-2">계절 의류/이불</h3>
+            </button>
+        </div>
+    </section>
+
+    <section id="step2" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-700">
+        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">02. Size Selection</h2>
+        <div class="flex flex-wrap items-end gap-6">
+            <button onclick="focusZone('A', 10000, this)" class="glass-panel p-10 text-left rounded-2xl flex-1 min-w-[250px]">
+                <span class="text-[10px] font-bold opacity-30 uppercase">Type A / ₩10,000</span>
+                <h3 class="text-3xl font-black mt-2 italic">Compact</h3>
+            </button>
+            <button onclick="focusZone('B', 25000, this)" class="glass-panel p-12 text-left rounded-2xl flex-1 min-w-[300px]">
+                <span class="text-[10px] font-bold opacity-30 uppercase">Type B / ₩25,000</span>
+                <h3 class="text-4xl font-black mt-2 italic">Standard</h3>
+            </button>
+            <button onclick="focusZone('C', 100000, this)" class="glass-panel p-14 text-left rounded-2xl flex-1 min-w-[350px]">
+                <span class="text-[10px] font-bold opacity-30 uppercase">Type C / ₩100,000</span>
+                <h3 class="text-5xl font-black mt-2 italic">Premium</h3>
+            </button>
+        </div>
+    </section>
+
+    <section id="step3" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-700 relative">
+        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">03. Locker Layout</h2>
+        <div class="flex flex-wrap gap-12 items-start justify-center p-16 bg-zinc-900/10 rounded-[3rem] border border-white/5" id="gridContainer">
+            <div id="zoneA" class="flex flex-wrap gap-2 w-64 transition-all">
+                <p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone A</p>
+                <script>
+                    for(let i=1; i<=12; i++) {
+                        const isOcc = Math.random() < 0.2 ? 'occupied' : '';
+                        document.write(`<button onclick="selectLocker(this)" class="size-a glass-panel flex items-center justify-center font-bold rounded ${isOcc}">A${i}</button>`);
+                    }
+                </script>
+            </div>
+            <div id="zoneB" class="flex flex-wrap gap-4 w-[480px] transition-all">
+                <p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone B</p>
+                <script>
+                    for(let i=1; i<=6; i++) {
+                        const isOcc = Math.random() < 0.3 ? 'occupied' : '';
+                        document.write(`<button onclick="selectLocker(this)" class="size-b glass-panel flex items-center justify-center font-bold rounded ${isOcc}">B${i}</button>`);
+                    }
+                </script>
+            </div>
+            <div id="zoneC" class="flex flex-wrap gap-6 transition-all">
+                <p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone C</p>
+                <script>
+                    for(let i=1; i<=3; i++) {
+                        const isOcc = Math.random() < 0.1 ? 'occupied' : '';
+                        document.write(`<button onclick="selectLocker(this)" class="size-c glass-panel flex items-center justify-center font-bold rounded ${isOcc}">C${i}</button>`);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div class="sticky-confirm-wrap">
+            <button id="lockerConfirmBtn" onclick="finalizeBooking()" class="btn-confirm-sticky bg-accent-red text-white px-12 py-5 font-black text-[12px] uppercase tracking-widest rounded-full shadow-2xl shadow-red-900/60">
+                Locker Confirmed <i class="fa-solid fa-arrow-down ml-2"></i>
+            </button>
+        </div>
+    </section>
+
+    <section id="step4" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-1000">
+        <div class="payment-card p-16 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-12">
+            <div class="text-center md:text-left">
+                <div class="mb-6">
+                    <span class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Selected Storage Number</span>
+                    <p id="finalLocker" class="text-4xl font-black text-white mt-2 italic underline decoration-red-600">Locker No.</p>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Monthly Total</span>
+                <h3 class="text-7xl font-black accent-red italic mt-2 tracking-tighter" id="totalPriceDisp">₩0</h3>
+            </div>
+            <button onclick="alert('구독 결제가 완료되었습니다.')" class="bg-white text-black px-24 py-7 font-black text-xs uppercase tracking-[0.3em] hover:bg-red-700 hover:text-white transition-all">Confirm & Pay</button>
+        </div>
+    </section>
+
+    <footer class="fixed bottom-0 w-full z-[200] glass-panel border-t border-white/10 px-10 py-8 backdrop-blur-3xl">
+        <div class="max-w-5xl mx-auto flex justify-between items-center text-[10px] tracking-[0.4em] font-black uppercase">
+            <div id="prog1" class="step-active">01. Category</div>
+            <div class="flex-1 mx-8 h-[1px] bg-white/5 relative"><div id="bar1" class="absolute h-full bg-red-700 transition-all duration-700 w-0"></div></div>
+            <div id="prog2" class="opacity-20">02. Size</div>
+            <div class="flex-1 mx-8 h-[1px] bg-white/5 relative"><div id="bar2" class="absolute h-full bg-red-700 transition-all duration-700 w-0"></div></div>
+            <div id="prog3" class="opacity-20">03. Locker</div>
+            <div class="flex-1 mx-8 h-[1px] bg-white/5 relative"><div id="bar3" class="absolute h-full bg-red-700 transition-all duration-700 w-0"></div></div>
+            <div id="prog4" class="opacity-20">04. Pay</div>
+        </div>
+    </footer>
+
+    <script>
+        // 내비게이션 부드러운 스크롤 인터랙션
+        document.querySelectorAll('.smooth-scroll').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    window.scrollTo({ top: targetElement.offsetTop - 100, behavior: 'smooth' });
+                }
+            });
+        });
+
+        // 스크롤 제어: 01단계 진입 시 히어로 내 메인 CTA 페이드아웃
+        const heroBtn = document.getElementById('heroBookingBtn');
+        const navBtn = document.getElementById('navBookingBtn');
+        const reserveSection = document.getElementById('reserve');
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            if (scrollY > (reserveSection.offsetTop - 400)) {
+                heroBtn.classList.add('hide-away');
+                navBtn.classList.add('hide-away');
+            } else {
+                heroBtn.classList.remove('hide-away');
+                navBtn.classList.remove('hide-away');
+            }
+        });
+
+        let selectedLockerName = "";
+
+        // 공통 단계 전전 로직 및 하단 바 트랙킹
+        function nextStep(current, next, el) {
+            const nextSection = document.getElementById(`step${next}`);
+            const nextProg = document.getElementById(`prog${next}`);
+            const progressBar = document.getElementById(`bar${current}`);
+            
+            el.parentElement.querySelectorAll('button').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+
+            if(nextSection) nextSection.style.opacity = "1";
+            if(nextProg) nextProg.classList.add('step-active');
+            if(progressBar) progressBar.style.width = '100%';
+
+            window.scrollTo({ top: nextSection.offsetTop - 150, behavior: 'smooth' });
+        }
+
+        // 구역 강조 및 가격 바인딩
+        function focusZone(zoneType, price, el) {
+            document.querySelectorAll('#gridContainer > div').forEach(z => z.classList.add('dimmed-zone'));
+            document.getElementById(`zone${zoneType}`).classList.remove('dimmed-zone');
+            document.getElementById('totalPriceDisp').innerText = '₩' + price.toLocaleString();
+            nextStep(2, 3, el);
+        }
+
+        // 보관함 선택 활성화 및 스티키 확인 버튼 호출
+        function selectLocker(el) {
+            if(el.classList.contains('occupied')) return;
+            document.querySelectorAll('#gridContainer button').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedLockerName = el.innerText;
+            document.getElementById('lockerConfirmBtn').classList.add('show');
+        }
+
+        // 데이터 최종 승인 및 04결제창 전송
+        function finalizeBooking() {
+            const step4 = document.getElementById('step4');
+            const prog4 = document.getElementById('prog4');
+            const bar3 = document.getElementById('bar3');
+
+            document.getElementById('finalLocker').innerText = "Storage No. " + selectedLockerName;
+            step4.style.opacity = "1";
+            prog4.classList.add('step-active');
+            bar3.style.width = '100%';
+            
+            document.getElementById('lockerConfirmBtn').classList.remove('show');
+            window.scrollTo({ top: step4.offsetTop - 150, behavior: 'smooth' });
+        }
+
+        // 실시간 환경 데이터 시뮬레이션 센서 데이터 수신 루프
+        setInterval(() => {
+            document.getElementById('tempDisp').innerText = (22 + Math.random() * 0.5).toFixed(1) + "°";
+            document.getElementById('humiDisp').innerText = Math.floor(40 + Math.random() * 5) + "%";
+        }, 3000);
+    </script>
+</body>
+</html>
