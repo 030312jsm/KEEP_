@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KEEP | 로컬 공유 보관 서비스</title>
+    <title>KEEP | ROOM SAVER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -12,235 +12,327 @@
         body { font-family: 'Pretendard', sans-serif; background-color: #000; color: #fff; letter-spacing: -0.05em; overflow-x: hidden; }
         .accent-red { color: #C80000; }
         .bg-accent-red { background-color: #C80000; }
-        .hero-title { font-size: clamp(2.5rem, 10vw, 7rem); line-height: 0.9; font-weight: 900; font-style: italic; }
-        .glass-panel { background: rgba(15, 15, 15, 0.85); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .selected { border-color: #C80000 !important; background: rgba(200, 0, 0, 0.12) !important; transform: scale(1.02); }
+        
+        .hero-title { font-size: clamp(3rem, 12vw, 8rem); line-height: 0.85; font-weight: 900; font-style: italic; }
+        .glass-panel { background: rgba(20, 20, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.5s ease; }
+        .payment-card { background: #0f0f0f; border: 2px solid #C80000; box-shadow: 0 40px 100px rgba(200, 0, 0, 0.2); }
+        
+        /* 네비게이션 버튼 동적 제어 */
+        .cta-btn { transition: opacity 0.6s ease, transform 0.6s ease; opacity: 1; }
+        .cta-btn.hide-away { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+        
+        /* 보관함 레이아웃 스타일 */
+        .dimmed-zone { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
+        .occupied { background: #050505 !important; color: #222 !important; border: 1px solid #111 !important; cursor: not-allowed; pointer-events: none; }
+        .selected { border-color: #C80000; background: rgba(200, 0, 0, 0.25); box-shadow: 0 0 30px rgba(200, 0, 0, 0.5); transform: scale(1.05); }
+        
+        /* 물리적 크기 비례 */
+        .size-a { width: 55px; height: 55px; font-size: 9px; }    
+        .size-b { width: 115px; height: 95px; font-size: 11px; } 
+        .size-c { width: 195px; height: 235px; font-size: 15px; } 
+        
+        /* 위치 확정 버튼 (Step 3 전용 스티키) */
+        .sticky-confirm-wrap {
+            position: sticky;
+            bottom: 150px; /* 하단 프로그레스바 위쪽에 위치 */
+            z-index: 100;
+            display: flex;
+            justify-content: flex-end;
+            pointer-events: none; /* 부모 영역 클릭 통과 */
+            margin-top: -60px;
+        }
+        .btn-confirm-sticky {
+            pointer-events: auto; /* 버튼만 클릭 가능 */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-confirm-sticky.show { opacity: 1; transform: translateY(0); }
+        
+        .step-active { color: #C80000; font-weight: 900; opacity: 1 !important; }
         section { padding-top: 140px; padding-bottom: 140px; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- 글로벌 네비게이션 -->
-    <nav class="fixed top-0 w-full z-[200] px-6 md:px-12 py-6 flex justify-between items-center mix-blend-difference">
-        <div class="text-xl font-black italic uppercase tracking-tighter">KEEP<span class="accent-red">.</span></div>
-        <div class="flex items-center gap-6">
-            <a href="#value-proposition" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all hidden md:block">Value</a>
-            <a href="#product-matrix" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all hidden md:block">Matrix</a>
-            <a href="#user-journey" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all hidden md:block">Journey</a>
-            <a href="#prototype" class="bg-white text-black px-5 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-red-700 hover:text-white transition-all">Interactive Demo</a>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-[200] px-10 py-8 flex justify-between items-center mix-blend-difference">
+        <div class="text-2xl font-black tracking-tighter italic uppercase">KEEP<span class="accent-red">.</span></div>
+        <div class="hidden md:flex space-x-10 text-[10px] uppercase tracking-[0.4em] font-bold opacity-50">
+            <a href="#about" class="smooth-scroll hover:opacity-100 transition">About</a>
+            <a href="#intro" class="smooth-scroll hover:opacity-100 transition">Value</a>
+            <a href="#monitor" class="smooth-scroll hover:opacity-100 transition">Live</a>
+            <a href="#reserve" class="smooth-scroll hover:opacity-100 transition">Booking</a>
         </div>
+        <a href="#reserve" id="navBookingBtn" class="smooth-scroll cta-btn bg-white text-black px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-700 hover:text-white transition-all">Start Booking</a>
     </nav>
 
-    <!-- 00. 히어로 섹션 (첫인상) -->
-    <header class="h-screen flex flex-col justify-center px-6 md:px-20 max-w-7xl mx-auto relative">
-        <p class="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mb-6">Gongju National Univ. Local Business</p>
-        <h1 class="hero-title tracking-tighter uppercase mb-10">KEEP THE SPACE,<br><span class="accent-red">SAVE THE ROOM.</span></h1>
-        <div class="max-w-xl border-l-2 border-red-700 pl-6 mb-12">
-            <p class="text-xl md:text-2xl font-bold mb-3 tracking-tight">공주대 신관캠퍼스 기숙사생과 1인 가구를 위한</p>
-            <p class="text-sm opacity-50 leading-relaxed font-medium">분산형 유휴 공실 상가를 활용한 항온·항습 무인 보관 시스템 플랫폼</p>
+    <!-- [LANDING] Hero -->
+    <header id="about" class="h-screen flex flex-col justify-center px-8 md:px-20 max-w-7xl mx-auto">
+        <p class="text-[10px] uppercase tracking-[0.6em] font-bold opacity-30 mb-6">Shingwan-dong Smart Storage</p>
+        <h1 class="hero-title tracking-tighter uppercase mb-10">ROOM SAVER,<br><span class="accent-red">KEEP.</span></h1>
+        <div class="max-w-xl border-l-2 border-red-900 pl-8 mb-12">
+            <p class="text-2xl font-bold opacity-90 mb-4 tracking-tight">비좁은 자취방의 한계를 넘다.</p>
+            <p class="text-sm opacity-40 leading-relaxed font-medium">공주대 학생들을 위해 설계된 최적의 항온·항습 스마트 보관함 서비스를 경험하세요.</p>
         </div>
-        <div class="flex gap-4">
-            <a href="#value-proposition" class="inline-flex items-center bg-accent-red text-white px-8 py-4 font-black text-xs uppercase tracking-widest hover:brightness-125 transition-all">
-                상세 기획서 탐색 <i class="fa-solid fa-arrow-down ml-3"></i>
-            </a>
-            <a href="#prototype" class="inline-flex items-center border border-white/20 text-white px-8 py-4 font-black text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-                데모 시연 바로가기
-            </a>
-        </div>
+        <a href="#intro" class="smooth-scroll inline-flex items-center bg-accent-red text-white w-fit px-12 py-5 font-black text-sm uppercase tracking-widest hover:brightness-125 transition-all shadow-2xl shadow-red-900/30">
+            브랜드 상세 기획 보기 <i class="fa-solid fa-arrow-down ml-4"></i>
+        </a>
     </header>
 
-    <!-- 01. 가치 제안 섹션 (가치제안서 기반) -->
-    <section id="value-proposition" class="px-6 md:px-20 bg-zinc-950 border-y border-white/5">
+    <!-- [LANDING] 상세 기획 및 비즈니스 매트릭스 섹션 (스탭 1 이전 배치) -->
+    <section id="intro" class="px-8 md:px-20 bg-zinc-950 border-t border-white/5">
         <div class="max-w-7xl mx-auto">
-            <div class="mb-16">
-                <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-3 block">01. Value Proposition</span>
-                <h2 class="text-3xl md:text-4xl font-black tracking-tighter uppercase">시장 페인포인트와 가치 제안</h2>
+            <div class="mb-20">
+                <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-4 block">Brand Definition</span>
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter uppercase">Why We Need <span class="accent-red">KEEP.</span></h2>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                <!-- 좌측: 문제 정의 -->
-                <div class="space-y-6">
-                    <div class="bg-black p-8 rounded-2xl border border-white/5">
-                        <div class="text-xs font-bold text-zinc-500 mb-3">Target Customer & Context</div>
-                        <p class="text-lg font-bold mb-4">공주대 신관캠퍼스 타 지역 거주 기숙사생 (약 4,600명)</p>
-                        <p class="text-sm text-zinc-400 leading-relaxed">매 학기 말 생활관 전원 임시 퇴소 의무가 발생할 때마다, 수많은 학생들은 방학 동안 거대한 이삿짐 박스를 둘 곳이 없어 심각한 공간 압박과 불편을 매년 반복적으로 겪고 있습니다.</p>
+            <!-- 3단 상세 구조 분석 장표 매핑 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 01. 가치제안 및 페인포인트 -->
+                <div class="glass-panel p-12 rounded-3xl flex flex-col justify-between border-t-2 border-t-zinc-700">
+                    <div>
+                        <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">01. Market Problem</div>
+                        <h3 class="text-2xl font-bold tracking-tight mb-6">반복되는 공간 결핍과<br>퇴실기의 이사 노동</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-4">학기 중에는 두꺼운 겨울 패딩, 부피가 큰 이불, 전공 서적들이 비좁은 1인 주거 환경을 침해합니다.</p>
+                        <p class="text-zinc-400 text-sm leading-relaxed">특히 방학 시즌 공주대 신관캠퍼스 약 4,600명의 기숙사생들은 필수 퇴소 의무로 인해 막대한 왕복 택배비와 비효율적인 이사 피로를 매년 강제당하고 있습니다.</p>
                     </div>
-                    <div class="bg-black p-8 rounded-2xl border border-white/5">
-                        <div class="text-xs font-bold text-zinc-500 mb-3">Existing Alternatives & Limitations</div>
-                        <p class="text-lg font-bold mb-4">우체국/편의점 택배 본가 발송 또는 지인 자취방 적재</p>
-                        <p class="text-sm text-zinc-400 leading-relaxed">기존 대체재는 과도한 왕복 운송비 지출, 무거운 반복 짐 정리 노동을 유발하며, 일반 자취방 보관 시 장마철 고습도로 인해 의류 및 물품이 손상되는 한계가 명확합니다.</p>
+                    <div class="mt-8 pt-6 border-t border-white/5 flex items-center text-zinc-600 text-xs font-bold">
+                        <i class="fa-solid fa-circle-exclamation mr-2 text-accent-red"></i> 대학가 타겟 페인 포인트 명확화
                     </div>
                 </div>
-                <!-- 우측: 해결책 & 핵심 이득 -->
-                <div class="glass-panel p-10 rounded-3xl h-full flex flex-col justify-between border-t-2 border-t-red-700 bg-gradient-to-b from-red-950/5 to-transparent">
+
+                <!-- 02. 비즈니스 요금 설계 및 정당성 -->
+                <div class="glass-panel p-12 rounded-3xl flex flex-col justify-between border-t-2 border-t-red-900 bg-gradient-to-b from-red-950/10 to-transparent">
                     <div>
-                        <div class="text-xs font-bold text-accent-red uppercase tracking-widest mb-4">The KEEP Solution</div>
-                        <h3 class="text-2xl font-bold tracking-tight mb-6">신관동 공실 상가를 활용한<br>항온·항습 스마트 보관 및 당일 픽업</h3>
-                        <p class="text-sm text-zinc-400 leading-relaxed mb-6">거대한 대형 물류창고 인프라를 구축하는 비효율을 제거하고, 대학가 상권 내 유휴 공실을 분산 셰어링 레이아웃으로 확보하여 초기 고정비를 완전히 혁신했습니다.</p>
+                        <div class="text-xs font-bold text-accent-red uppercase tracking-widest mb-6">02. Value Solution</div>
+                        <h3 class="text-2xl font-bold tracking-tight mb-6">물품별 맞춤형 규격과<br>합리적인 슬롯 요금제</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-6">학생들의 보관 목적과 짐의 부피 단위에 따라 단가 스펙을 현실적으로 분리하여 진입 장벽을 완전히 파괴했습니다.</p>
                         
-                        <div class="grid grid-cols-2 gap-4 mt-8">
-                            <div class="p-4 bg-black/50 rounded-xl border border-white/5">
-                                <div class="text-2xl font-black text-accent-red">50%+</div>
-                                <div class="text-xs text-zinc-400 mt-1">왕복 택배비 대비 비용 절감</div>
+                        <!-- 스팩 매트릭스 연동 안내 -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
+                                <span class="text-xs font-bold">Type A (의류/서적)</span>
+                                <span class="text-xs font-black text-accent-red">월 ₩10,000</span>
                             </div>
-                            <div class="p-4 bg-black/50 rounded-xl border border-white/5">
-                                <div class="text-2xl font-black text-accent-red">On-Demand</div>
-                                <div class="text-xs text-zinc-400 mt-1">예약 기반 당일 즉시 수거</div>
+                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
+                                <span class="text-xs font-bold">Type B (기숙사 박스)</span>
+                                <span class="text-xs font-black text-accent-red">월 ₩25,000</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
+                                <span class="text-xs font-bold">Type C (대형 인프라)</span>
+                                <span class="text-xs font-black text-accent-red">월 ₩100,000</span>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 02. 제품 속성 및 스펙 매트릭스 (제품속성서 + Kano 요금제 기반) -->
-    <section id="product-matrix" class="px-6 md:px-20 border-b border-white/5">
-        <div class="max-w-7xl mx-auto">
-            <div class="mb-16">
-                <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-3 block">02. Product Attribute Matrix</span>
-                <h2 class="text-3xl md:text-4xl font-black tracking-tighter uppercase">수요 맞춤형 기능 및 가격 정책</h2>
-            </div>
-
-            <!-- 제품속성서 그리드화 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div class="glass-panel p-8 rounded-2xl">
-                    <div class="w-8 h-8 rounded-full bg-red-950/50 flex items-center justify-center text-accent-red font-bold text-xs mb-4">01</div>
-                    <h4 class="text-lg font-bold mb-2">실시간 빈 슬롯 지정 예약</h4>
-                    <p class="text-xs text-zinc-500 leading-relaxed">무작위 배정이 아닌 웹 기반 대시보드 뷰포트 아키텍처를 통해 사용자가 원하는 구역의 빈 보관함을 직접 확인하고 원스톱으로 선점 결제합니다.</p>
-                </div>
-                <div class="glass-panel p-8 rounded-2xl">
-                    <div class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 font-bold text-xs mb-4">02</div>
-                    <h4 class="text-lg font-bold mb-2">Python 항온·항습 제어</h4>
-                    <p class="text-xs text-zinc-500 leading-relaxed">장기 보관 시 장마철 내부 온습도 리스크를 상시 모니터링하는 제어 루프 시스템을 직접 연동하여 물품 훼손 가능성을 제로에 수렴하게 제어합니다.</p>
-                </div>
-                <div class="glass-panel p-8 rounded-2xl">
-                    <div class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 font-bold text-xs mb-4">03</div>
-                    <h4 class="text-lg font-bold mb-2">로컬 거점 도보 접근성</h4>
-                    <p class="text-xs text-zinc-500 leading-relaxed">차량을 이용해 먼 외곽 물류창고로 갈 필요 없이, 신관동 대학가 상권 내부 거점을 기반으로 하여 학생들이 언제든 24시간 도보 비대면 입출고가 가능합니다.</p>
-                </div>
-            </div>
-
-            <!-- 정밀 다단 요금제 카드 구조 -->
-            <div class="bg-zinc-950 p-8 rounded-3xl border border-white/5">
-                <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-6"><i class="fa-solid fa-tags text-accent-red mr-2"></i> 세분화된 보관함 인프라 단가 스펙</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="p-6 bg-black rounded-xl border border-white/5">
-                        <span class="text-[10px] font-bold text-zinc-500 uppercase">Type A / Compact</span>
-                        <div class="text-2xl font-black text-white mt-2 mb-3">월 ₩10,000</div>
-                        <p class="text-xs text-zinc-400 leading-relaxed">두꺼운 겨울철 패딩 및 의류, 단기 적재가 필요한 전공 서적 등 소형 물품 최적화 슬롯</p>
+                    <div class="mt-8 pt-6 border-t border-white/5 flex items-center text-zinc-600 text-xs font-bold">
+                        <i class="fa-solid fa-calculator mr-2 text-accent-red"></i> 일반 왕복 택배비 대비 50% 절감 효과
                     </div>
-                    <div class="p-6 bg-black rounded-xl border border-red-950/60 bg-gradient-to-b from-red-950/10 to-transparent">
-                        <span class="text-[10px] font-bold text-accent-red uppercase">Type B / Standard (주력)</span>
-                        <div class="text-2xl font-black text-accent-red mt-2 mb-3">월 ₩25,000</div>
-                        <p class="text-xs text-zinc-400 leading-relaxed">기숙사 퇴실 시 발생하는 대형 규격의 이삿짐 박스 및 단기 리모델링 자취생 주력 슬롯</p>
+                </div>
+
+                <!-- 03. 기술적 차별성 및 공간 셰어링 -->
+                <div class="glass-panel p-12 rounded-3xl flex flex-col justify-between border-t-2 border-t-zinc-700">
+                    <div>
+                        <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">03. Tech & Strategy</div>
+                        <h3 class="text-2xl font-bold tracking-tight mb-6">Python 자동 환경 제어 및<br>로컬 공실 상가 활용</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-4">장기 방치 시 습기로 인한 물품 손상을 방지하기 위해 Python 아키텍처 기반의 항온·항습 제어 시스템 기술을 매핑했습니다.</p>
+                        <p class="text-zinc-400 text-sm leading-relaxed">거대한 거점 물류창고를 직접 세우는 리스크를 피하고 신관동 대학가 상권의 공실을 쪼개 쓰는 공간 셰어링 방식으로 고정비를 최적화했습니다.</p>
                     </div>
-                    <div class="p-6 bg-black rounded-xl border border-white/5">
-                        <span class="text-[10px] font-bold text-zinc-500 uppercase">Type C / Premium</span>
-                        <div class="text-2xl font-black text-white mt-2 mb-3">월 ₩100,000</div>
-                        <p class="text-xs text-zinc-400 leading-relaxed">대형 가구, 고가 취미 장비 및 악기, 동아리 물품 등을 대량 수용하는 프리미엄 대형 슬롯</p>
+                    <div class="mt-8 pt-6 border-t border-white/5 flex items-center text-zinc-600 text-xs font-bold">
+                        <i class="fa-solid fa-code mr-2 text-accent-red"></i> 기획·디자인·프로토타입 통합 빌드 완료
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 03. 라이브 데이터 모니터링 (IoT 기술력 피력) -->
-    <section id="monitor" class="px-6 md:px-20 bg-zinc-950 border-b border-white/5">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <!-- [LANDING] Live Monitor -->
+    <section id="monitor" class="px-8 md:px-20 bg-[#030303] border-y border-white/5">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
             <div>
-                <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-3 block">Hardware IoT Connectivity</span>
-                <h2 class="text-3xl md:text-4xl font-black italic uppercase tracking-tighter mb-4">Live Status Loop</h2>
-                <p class="text-zinc-400 text-sm leading-relaxed max-w-md">외주 대행 비용 없이 Python 아키텍처로 독립 빌드한 보관함 내부 환경 제어 데이터 인터페이스입니다. 2초 주기로 센서 수신 값을 자동 갱신합니다.</p>
-            </div>
-            <div class="flex gap-4">
-                <div class="glass-panel p-8 rounded-2xl flex-1 text-center">
-                    <p class="text-[10px] opacity-30 uppercase font-bold tracking-widest">Temperature</p>
-                    <p class="text-3xl md:text-4xl font-black accent-red mt-2" id="tempDisp">22.4°C</p>
+                <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-4 block">Hardware IoT Connectivity</span>
+                <h2 class="text-4xl font-black italic uppercase tracking-tighter mb-6">Live Status</h2>
+                <div class="flex gap-4">
+                    <div class="glass-panel p-8 rounded-2xl flex-1 text-center">
+                        <span class="text-[10px] font-bold opacity-30 uppercase">Temp</span>
+                        <p class="text-4xl font-black accent-red mt-2" id="tempDisp">22.4°</p>
+                    </div>
+                    <div class="glass-panel p-8 rounded-2xl flex-1 text-center">
+                        <span class="text-[10px] font-bold opacity-30 uppercase">Humi</span>
+                        <p class="text-4xl font-black accent-red mt-2" id="humiDisp">42%</p>
+                    </div>
                 </div>
-                <div class="glass-panel p-8 rounded-2xl flex-1 text-center">
-                    <p class="text-[10px] opacity-30 uppercase font-bold tracking-widest">Humidity</p>
-                    <p class="text-3xl md:text-4xl font-black accent-red mt-2" id="humiDisp">42%</p>
-                </div>
+            </div>
+            <div class="relative glass-panel aspect-video flex items-center justify-center rounded-3xl border-red-900/20 overflow-hidden">
+                <i class="fa-solid fa-qrcode text-9xl opacity-5"></i>
             </div>
         </div>
     </section>
 
-    <!-- 04. 인터랙티브 예약 프로토타입 시연 공간 -->
-    <section id="prototype" class="px-6 md:px-20 max-w-7xl mx-auto">
-        <div class="mb-12">
-            <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-3 block">Interactive Demo</span>
-            <h2 class="text-3xl font-black italic uppercase tracking-tighter">Step 01. Select Category</h2>
-        </div>
-        <div class="grid md:grid-cols-2 gap-6" id="categoryGroup">
-            <button onclick="selectCategory(this)" class="glass-panel p-12 text-left rounded-2xl hover:border-red-700/50 transition-all text-lg font-bold">
-                기숙사 퇴실 이삿짐 / 계절 의류 및 이불
+    <!-- [BOOKING] Step 1 -->
+    <section id="reserve" class="px-8 md:px-20 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">01. Category</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button onclick="nextStep(1, 2, this)" class="glass-panel p-16 text-left rounded-3xl group">
+                <i class="fa-solid fa-box-open text-3xl mb-8 opacity-20 group-hover:accent-red"></i>
+                <h3 class="text-2xl font-bold mb-2">기숙사 이삿짐 / 박스 보관</h3>
             </button>
-            <button onclick="selectCategory(this)" class="glass-panel p-12 text-left rounded-2xl hover:border-red-700/50 transition-all text-lg font-bold">
-                학업용 전공 서적 / 기타 개인 물품 보관
-            </button>
-        </div>
-    </section>
-
-    <!-- Step 2 (인터랙션 연동 타겟) -->
-    <section id="step2" class="px-6 md:px-20 max-w-7xl mx-auto opacity-20 transition-all duration-700">
-        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">Step 02. Size Selection</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="sizeGroup">
-            <button onclick="selectSize(this)" class="glass-panel p-8 rounded-xl text-left hover:border-red-700/50 transition-all">
-                <p class="text-xs opacity-40 font-bold uppercase">Type A</p>
-                <p class="text-lg font-black mt-1">Compact (₩10,000)</p>
-            </button>
-            <button onclick="selectSize(this)" class="glass-panel p-8 rounded-xl text-left hover:border-red-700/50 transition-all">
-                <p class="text-xs opacity-40 font-bold uppercase">Type B</p>
-                <p class="text-lg font-black mt-1">Standard (₩25,000)</p>
-            </button>
-            <button onclick="selectSize(this)" class="glass-panel p-8 rounded-xl text-left hover:border-red-700/50 transition-all">
-                <p class="text-xs opacity-40 font-bold uppercase">Type C</p>
-                <p class="text-lg font-black mt-1">Premium (₩100,000)</p>
+            <button onclick="nextStep(1, 2, this)" class="glass-panel p-16 text-left rounded-3xl group">
+                <i class="fa-solid fa-shirt text-3xl mb-8 opacity-20 group-hover:accent-red"></i>
+                <h3 class="text-2xl font-bold mb-2">계절 의류 / 이불 / 서적</h3>
             </button>
         </div>
     </section>
 
-    <!-- 스크립트 로직 (상호작용 안전성 확보) -->
+    <!-- [BOOKING] Step 2 -->
+    <section id="step2" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-700">
+        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">02. Size Selection</h2>
+        <div class="flex flex-wrap items-end gap-6">
+            <button onclick="focusZone('A', 10000, this)" class="glass-panel p-10 text-left rounded-2xl flex-1 min-w-[250px]">
+                <span class="text-[10px] font-bold opacity-30 uppercase">Type A / ₩10,000</span>
+                <h3 class="text-3xl font-black mt-2 italic">Compact</h3>
+            </button>
+            <button onclick="focusZone('B', 25000, this)" class="glass-panel p-12 text-left rounded-2xl flex-1 min-w-[300px]">
+                <span class="text-[10px] font-bold opacity-30 uppercase">Type B / ₩25,000</span>
+                <h3 class="text-4xl font-black mt-2 italic">Standard</h3>
+            </button>
+            <button onclick="focusZone('C', 100000, this)" class="glass-panel p-14 text-left rounded-2xl flex-1 min-w-[350px]">
+                <span class="text-[10px] font-bold opacity-30 uppercase">Type C / ₩100,000</span>
+                <h3 class="text-5xl font-black mt-2 italic">Premium</h3>
+            </button>
+        </div>
+    </section>
+
+    <!-- [BOOKING] Step 3: Physical Grid (Sticky Button Inside) -->
+    <section id="step3" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-700 relative">
+        <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">03. Locker Layout</h2>
+        
+        <div class="flex flex-wrap gap-12 items-start justify-center p-16 bg-zinc-900/10 rounded-[3rem] border border-white/5" id="gridContainer">
+            <div id="zoneA" class="flex flex-wrap gap-2 w-64 transition-all"><p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone A</p><script>for(let i=1; i<=12; i++) { const isOcc = Math.random() < 0.2 ? 'occupied' : ''; document.write(`<button onclick="selectLocker(this)" class="size-a glass-panel flex items-center justify-center font-bold rounded ${isOcc}">A${i}</button>`); }</script></div>
+            <div id="zoneB" class="flex flex-wrap gap-4 w-[480px] transition-all"><p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone B</p><script>for(let i=1; i<=6; i++) { const isOcc = Math.random() < 0.3 ? 'occupied' : ''; document.write(`<button onclick="selectLocker(this)" class="size-b glass-panel flex items-center justify-center font-bold rounded ${isOcc}">B${i}</button>`); }</script></div>
+            <div id="zoneC" class="flex flex-wrap gap-6 transition-all"><p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone C</p><script>for(let i=1; i<=3; i++) { const isOcc = Math.random() < 0.1 ? 'occupied' : ''; document.write(`<button onclick="selectLocker(this)" class="size-c glass-panel flex items-center justify-center font-bold rounded ${isOcc}">C${i}</button>`); }</script></div>
+        </div>
+
+        <!-- 3번 구역 내에서 따라오는 버튼 -->
+        <div class="sticky-confirm-wrap">
+            <button id="lockerConfirmBtn" onclick="finalizeBooking()" class="btn-confirm-sticky bg-accent-red text-white px-12 py-5 font-black text-[12px] uppercase tracking-widest rounded-full shadow-2xl shadow-red-900/60">
+                Locker Confirmed <i class="fa-solid fa-arrow-down ml-2"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- [BOOKING] Step 4: Final Payment -->
+    <section id="step4" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-1000">
+        <div class="payment-card p-16 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-12">
+            <div class="text-center md:text-left">
+                <div class="mb-6"><span class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Selected Storage Number</span><p id="finalLocker" class="text-4xl font-black text-white mt-2 italic underline decoration-red-600">Locker No.</p></div>
+                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Monthly Total</span>
+                <h3 class="text-7xl font-black accent-red italic mt-2 tracking-tighter" id="totalPriceDisp">₩0</h3>
+            </div>
+            <button onclick="alert('구독 결제가 완료되었습니다.')" class="bg-white text-black px-24 py-7 font-black text-xs uppercase tracking-[0.3em] hover:bg-red-700 hover:text-white transition-all">Confirm & Pay</button>
+        </div>
+    </section>
+
+    <!-- Footer Progress Bar -->
+    <footer class="fixed bottom-0 w-full z-[200] glass-panel border-t border-white/10 px-10 py-8 backdrop-blur-3xl">
+        <div class="max-w-5xl mx-auto flex justify-between items-center text-[10px] tracking-[0.4em] font-black uppercase">
+            <div id="prog1" class="step-active">01. Category</div>
+            <div class="flex-1 mx-8 h-[1px] bg-white/5 relative"><div id="bar1" class="absolute h-full bg-red-700 transition-all duration-700 w-0"></div></div>
+            <div id="prog2" class="opacity-20">02. Size</div>
+            <div class="flex-1 mx-8 h-[1px] bg-white/5 relative"><div id="bar2" class="absolute h-full bg-red-700 transition-all duration-700 w-0"></div></div>
+            <div id="prog3" class="opacity-20">03. Locker</div>
+            <div class="flex-1 mx-8 h-[1px] bg-white/5 relative"><div id="bar3" class="absolute h-full bg-red-700 transition-all duration-700 w-0"></div></div>
+            <div id="prog4" class="opacity-20">04. Pay</div>
+        </div>
+    </footer>
+
     <script>
-        // 01. 카테고리 버튼 제어 및 자동 스크롤
-        function selectCategory(button) {
-            const group = document.getElementById('categoryGroup');
-            group.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            
-            const step2Section = document.getElementById('step2');
-            step2Section.style.opacity = "1";
-            
-            setTimeout(() => {
-                window.scrollTo({
-                    top: step2Section.offsetTop - 80,
-                    behavior: 'smooth'
-                });
-            }, 50);
+        // 1. 스무스 스크롤 & 버튼 소멸
+        document.querySelectorAll('.smooth-scroll').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) { window.scrollTo({ top: targetElement.offsetTop - 100, behavior: 'smooth' }); }
+            });
+        });
+
+        const heroBtn = document.getElementById('heroBookingBtn');
+        const navBtn = document.getElementById('navBookingBtn');
+        const reserveSection = document.getElementById('reserve');
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            if (reserveSection && scrollY > (reserveSection.offsetTop - 400)) {
+                if(heroBtn) heroBtn.classList.add('hide-away');
+                if(navBtn) navBtn.classList.add('hide-away');
+            } else {
+                if(heroBtn) heroBtn.classList.remove('hide-away');
+                if(navBtn) navBtn.classList.remove('hide-away');
+            }
+        });
+
+        // 2. 예약 시스템 로직
+        let selectedLockerName = "";
+
+        function nextStep(current, next, el) {
+            const nextSection = document.getElementById(`step${next}`);
+            const nextProg = document.getElementById(`prog${next}`);
+            const progressBar = document.getElementById(`bar${current}`);
+            el.parentElement.querySelectorAll('button').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            if(nextSection) nextSection.style.opacity = "1";
+            if(nextProg) nextProg.classList.add('step-active');
+            if(progressBar) progressBar.style.width = '100%';
+            if(nextSection) window.scrollTo({ top: nextSection.offsetTop - 150, behavior: 'smooth' });
         }
 
-        // 02. 요금제 크기 버튼 피드백 제어
-        function selectSize(button) {
-            const group = document.getElementById('sizeGroup');
-            group.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
+        function focusZone(zoneType, price, el) {
+            document.querySelectorAll('#gridContainer > div').forEach(z => z.classList.add('dimmed-zone'));
+            const targetZone = document.getElementById(`zone${zoneType}`);
+            if(targetZone) targetZone.classList.remove('dimmed-zone');
             
-            setTimeout(() => {
-                alert('KEEP 예약 데모 연동 성공: 지정 슬롯 하드웨어 오픈 키 맵 연계 단계로 진입합니다.');
-            }, 150);
+            const priceDisp = document.getElementById('totalPriceDisp');
+            if(priceDisp) priceDisp.innerText = '₩' + price.toLocaleString();
+            nextStep(2, 3, el);
         }
 
-        // 실시간 IoT 센서 모니터링 가상 동적 데이터 루프
+        function selectLocker(el) {
+            if(el.classList.contains('occupied')) return;
+            document.querySelectorAll('#gridContainer button').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedLockerName = el.innerText;
+            
+            const confirmBtn = document.getElementById('lockerConfirmBtn');
+            if(confirmBtn) confirmBtn.classList.add('show');
+        }
+
+        function finalizeBooking() {
+            const step4 = document.getElementById('step4');
+            const prog4 = document.getElementById('prog4');
+            const bar3 = document.getElementById('bar3');
+            
+            const finalLockerDisp = document.getElementById('finalLocker');
+            if(finalLockerDisp) finalLockerDisp.innerText = "Storage No. " + selectedLockerName;
+            
+            if(step4) step4.style.opacity = "1";
+            if(prog4) prog4.classList.add('step-active');
+            if(bar3) bar3.style.width = '100%';
+            
+            const confirmBtn = document.getElementById('lockerConfirmBtn');
+            if(confirmBtn) confirmBtn.classList.remove('show');
+            if(step4) window.scrollTo({ top: step4.offsetTop - 150, behavior: 'smooth' });
+        }
+
         setInterval(() => {
             const tempDisp = document.getElementById('tempDisp');
             const humiDisp = document.getElementById('humiDisp');
-            
             if(tempDisp && humiDisp) {
-                tempDisp.innerText = (22 + Math.random() * 0.4).toFixed(1) + "°C";
-                humiDisp.innerText = Math.floor(40 + Math.random() * 4) + "%";
+                tempDisp.innerText = (22 + Math.random() * 0.5).toFixed(1) + "°";
+                humiDisp.innerText = Math.floor(40 + Math.random() * 5) + "%";
             }
-        }, 2000);
+        }, 3000);
     </script>
 </body>
 </html>
