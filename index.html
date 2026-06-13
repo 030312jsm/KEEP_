@@ -17,32 +17,28 @@
         .glass-panel { background: rgba(20, 20, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.5s ease; }
         .payment-card { background: #0f0f0f; border: 2px solid #C80000; box-shadow: 0 40px 100px rgba(200, 0, 0, 0.2); }
         
-        /* 네비게이션 버튼 동적 제어 */
         .cta-btn { transition: opacity 0.6s ease, transform 0.6s ease; opacity: 1; }
         .cta-btn.hide-away { opacity: 0; transform: translateY(-10px); pointer-events: none; }
         
-        /* 보관함 레이아웃 스타일 */
         .dimmed-zone { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
         .occupied { background: #050505 !important; color: #222 !important; border: 1px solid #111 !important; cursor: not-allowed; pointer-events: none; }
         .selected { border-color: #C80000; background: rgba(200, 0, 0, 0.25); box-shadow: 0 0 30px rgba(200, 0, 0, 0.5); transform: scale(1.05); }
         
-        /* 물리적 크기 비례 */
         .size-a { width: 55px; height: 55px; font-size: 9px; }    
         .size-b { width: 115px; height: 95px; font-size: 11px; } 
         .size-c { width: 195px; height: 235px; font-size: 15px; } 
         
-        /* 위치 확정 버튼 (Step 3 전용 스티키) */
         .sticky-confirm-wrap {
             position: sticky;
-            bottom: 150px; /* 하단 프로그레스바 위쪽에 위치 */
+            bottom: 150px;
             z-index: 100;
             display: flex;
             justify-content: flex-end;
-            pointer-events: none; /* 부모 영역 클릭 통과 */
+            pointer-events: none;
             margin-top: -60px;
         }
         .btn-confirm-sticky {
-            pointer-events: auto; /* 버튼만 클릭 가능 */
+            pointer-events: auto;
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -55,19 +51,18 @@
 </head>
 <body class="antialiased">
 
-    <!-- Navigation -->
     <nav class="fixed top-0 w-full z-[200] px-10 py-8 flex justify-between items-center mix-blend-difference">
         <div class="text-2xl font-black tracking-tighter italic uppercase">KEEP<span class="accent-red">.</span></div>
         <div class="hidden md:flex space-x-10 text-[10px] uppercase tracking-[0.4em] font-bold opacity-50">
             <a href="#about" class="smooth-scroll hover:opacity-100 transition">About</a>
             <a href="#intro" class="smooth-scroll hover:opacity-100 transition">Value</a>
+            <a href="#blueprint" class="smooth-scroll hover:opacity-100 transition">Blueprint</a>
             <a href="#monitor" class="smooth-scroll hover:opacity-100 transition">Live</a>
             <a href="#reserve" class="smooth-scroll hover:opacity-100 transition">Booking</a>
         </div>
         <a href="#reserve" id="navBookingBtn" class="smooth-scroll cta-btn bg-white text-black px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-700 hover:text-white transition-all">Start Booking</a>
     </nav>
 
-    <!-- [LANDING] Hero -->
     <header id="about" class="h-screen flex flex-col justify-center px-8 md:px-20 max-w-7xl mx-auto">
         <p class="text-[10px] uppercase tracking-[0.6em] font-bold opacity-30 mb-6">Shingwan-dong Smart Storage</p>
         <h1 class="hero-title tracking-tighter uppercase mb-10">ROOM SAVER,<br><span class="accent-red">KEEP.</span></h1>
@@ -80,7 +75,6 @@
         </a>
     </header>
 
-    <!-- [LANDING] 상세 기획 및 비즈니스 매트릭스 섹션 (스탭 1 이전 배치) -->
     <section id="intro" class="px-8 md:px-20 bg-zinc-950 border-t border-white/5">
         <div class="max-w-7xl mx-auto">
             <div class="mb-20">
@@ -88,9 +82,7 @@
                 <h2 class="text-4xl md:text-5xl font-black tracking-tighter uppercase">Why We Need <span class="accent-red">KEEP.</span></h2>
             </div>
 
-            <!-- 3단 상세 구조 분석 장표 매핑 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- 01. 가치제안 및 페인포인트 -->
                 <div class="glass-panel p-12 rounded-3xl flex flex-col justify-between border-t-2 border-t-zinc-700">
                     <div>
                         <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">01. Market Problem</div>
@@ -103,35 +95,32 @@
                     </div>
                 </div>
 
-                <!-- 02. 비즈니스 요금 설계 및 정당성 -->
                 <div class="glass-panel p-12 rounded-3xl flex flex-col justify-between border-t-2 border-t-red-900 bg-gradient-to-b from-red-950/10 to-transparent">
                     <div>
-                        <div class="text-xs font-bold text-accent-red uppercase tracking-widest mb-6">02. Value Solution</div>
-                        <h3 class="text-2xl font-bold tracking-tight mb-6">물품별 맞춤형 규격과<br>합리적인 슬롯 요금제</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed mb-6">학생들의 보관 목적과 짐의 부피 단위에 따라 단가 스펙을 현실적으로 분리하여 진입 장벽을 완전히 파괴했습니다.</p>
+                        <div class="text-xs font-bold text-accent-red uppercase tracking-widest mb-6">02. Product & Value</div>
+                        <h3 class="text-2xl font-bold tracking-tight mb-6">제품 가상 모형 및<br>합리적인 슬롯 요금제</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-6">짐의 부피 단위에 따라 단가 스펙과 물리적인 공간 가상 모형 레이아웃을 3단계로 엄격히 차등화 설계했습니다.</p>
                         
-                        <!-- 스팩 매트릭스 연동 안내 -->
                         <div class="space-y-3">
-                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
-                                <span class="text-xs font-bold">Type A (의류/서적)</span>
-                                <span class="text-xs font-black text-accent-red">월 ₩10,000</span>
+                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5 text-xs">
+                                <span class="font-bold">Type A [Compact] <span class="opacity-40 block text-[10px]">W55 x H55 cm / 의류·서적</span></span>
+                                <span class="font-black text-accent-red">월 ₩10,000</span>
                             </div>
-                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
-                                <span class="text-xs font-bold">Type B (기숙사 박스)</span>
-                                <span class="text-xs font-black text-accent-red">월 ₩25,000</span>
+                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5 text-xs">
+                                <span class="font-bold">Type B [Standard] <span class="opacity-40 block text-[10px]">W115 x H95 cm / 기숙사박스</span></span>
+                                <span class="font-black text-accent-red">월 ₩25,000</span>
                             </div>
-                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
-                                <span class="text-xs font-bold">Type C (대형 인프라)</span>
-                                <span class="text-xs font-black text-accent-red">월 ₩100,000</span>
+                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5 text-xs">
+                                <span class="font-bold">Type C [Premium] <span class="opacity-40 block text-[10px]">W195 x H235 cm / 가구·장비</span></span>
+                                <span class="font-black text-accent-red">월 ₩100,000</span>
                             </div>
                         </div>
                     </div>
                     <div class="mt-8 pt-6 border-t border-white/5 flex items-center text-zinc-600 text-xs font-bold">
-                        <i class="fa-solid fa-calculator mr-2 text-accent-red"></i> 일반 왕복 택배비 대비 50% 절감 효과
+                        <i class="fa-solid fa-cube mr-2 text-accent-red"></i> 하드웨어 크기 비례 최적화 모델 매핑
                     </div>
                 </div>
 
-                <!-- 03. 기술적 차별성 및 공간 셰어링 -->
                 <div class="glass-panel p-12 rounded-3xl flex flex-col justify-between border-t-2 border-t-zinc-700">
                     <div>
                         <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">03. Tech & Strategy</div>
@@ -147,7 +136,57 @@
         </div>
     </section>
 
-    <!-- [LANDING] Live Monitor -->
+    <section id="blueprint" class="px-8 md:px-20 bg-zinc-900/40 border-t border-white/5">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-16">
+                <span class="text-[10px] font-black text-accent-red uppercase tracking-[0.6em] mb-4 block">Operation Architecture</span>
+                <h2 class="text-4xl font-black tracking-tighter uppercase">KEEP 서비스 청사진 <span class="text-sm font-normal text-zinc-500 lowercase">Service Blueprint</span></h2>
+                <p class="text-zinc-400 text-sm mt-4 max-w-2xl">고객의 가시적 여정부터 백엔드 자동화 및 로컬 하드웨어 제어 인프라 인터랙션이 구동되는 전체 서비스 운영 아키텍처 매트릭스입니다.</p>
+            </div>
+
+            <div class="overflow-x-auto glass-panel rounded-2xl border border-white/5">
+                <table class="w-full text-left border-collapse min-w-[900px]">
+                    <thead>
+                        <tr class="border-b border-white/10 bg-black/40 text-[11px] uppercase tracking-widest text-zinc-400">
+                            <th class="p-6 w-48 border-r border-white/5">청사진 레이어</th>
+                            <th class="p-6">01. 인지 및 예약 단계</th>
+                            <th class="p-6">02. 당일 수거 및 입고</th>
+                            <th class="p-6">03. 방학 중 장기 관리</th>
+                            <th class="p-6">04. 개강 후 무인 출고</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-xs text-zinc-300 divide-y divide-white/5">
+                        <tr class="bg-zinc-950/20">
+                            <td class="p-6 font-bold bg-black/40 border-r border-white/5 text-white">고객 활동 (Customer Action)</td>
+                            <td class="p-6">퇴소 공지 인지 후 웹에서 실시간 빈 보관함 조회 및 지정 예약 결제</td>
+                            <td class="p-6">예약 시간에 맞춰 짐 포장 및 현장 수거 매니저에게 인계</td>
+                            <td class="p-6">본가 거주 중 모바일 대시보드로 실시간 보관함 온습도 상태 확인</td>
+                            <td class="p-6">개강 당일 도보 거점에 방문하여 스마트키로 무인 보관함 오픈 후 출고</td>
+                        </tr>
+                        <tr class="bg-red-950/10 text-[10px] text-accent-red font-bold">
+                            <td class="p-2 bg-black/40 border-r border-white/5 text-center">--- Line of Visibility ---</td>
+                            <td colspan="4" class="p-2 tracking-widest px-6">▲ 가시선 (이 아래의 상호작용은 고객에게 보이지 않는 무인 인프라 영역입니다)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-6 font-bold bg-black/40 border-r border-white/5 text-white">전방 무인 접점 (Onstage IT/Staff)</td>
+                            <td class="p-6 text-accent-red font-medium">KEEP 하이엔드 UI 통합 예약 웹 인터페이스 가동</td>
+                            <td class="p-6">수거 차량 및 로컬 픽업 매니저 현장 배치 상호작용</td>
+                            <td class="p-6">실시간 환경 알림톡 자동 카카오 채널 리포트 발송</td>
+                            <td class="p-6 text-accent-red font-medium">모바일 웹 일회용 웹토큰 스마트키 무인 도어락 연동</td>
+                        </tr>
+                        <tr class="bg-zinc-950/20">
+                            <td class="p-6 font-bold bg-black/40 border-r border-white/5 text-white">후방 시스템 / 지원 프로세스</td>
+                            <td class="p-6">FastAPI 실시간 슬롯 점유(In use) 연산 및 데이터베이스 동기화</td>
+                            <td class="p-6">신관동 공실 거점 공간 레이아웃 보관함 배치 동선 통제 및 최적화</td>
+                            <td class="p-6 text-accent-red font-medium">Python 기반 하드웨어 센서 모니터링 및 항온항습 장치 자동 제어 스크립트 상시 구동</td>
+                            <td class="p-6">결제 만료 세션 검증 및 디지털 락 보안 인증 마이크로 프로세서 처리</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <section id="monitor" class="px-8 md:px-20 bg-[#030303] border-y border-white/5">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
             <div>
@@ -170,7 +209,6 @@
         </div>
     </section>
 
-    <!-- [BOOKING] Step 1 -->
     <section id="reserve" class="px-8 md:px-20 max-w-7xl mx-auto">
         <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">01. Category</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -185,7 +223,6 @@
         </div>
     </section>
 
-    <!-- [BOOKING] Step 2 -->
     <section id="step2" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-700">
         <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">02. Size Selection</h2>
         <div class="flex flex-wrap items-end gap-6">
@@ -204,7 +241,6 @@
         </div>
     </section>
 
-    <!-- [BOOKING] Step 3: Physical Grid (Sticky Button Inside) -->
     <section id="step3" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-700 relative">
         <h2 class="text-3xl font-black italic mb-12 uppercase tracking-tighter">03. Locker Layout</h2>
         
@@ -214,7 +250,6 @@
             <div id="zoneC" class="flex flex-wrap gap-6 transition-all"><p class="w-full text-[10px] font-black opacity-30 mb-4 tracking-widest uppercase">Zone C</p><script>for(let i=1; i<=3; i++) { const isOcc = Math.random() < 0.1 ? 'occupied' : ''; document.write(`<button onclick="selectLocker(this)" class="size-c glass-panel flex items-center justify-center font-bold rounded ${isOcc}">C${i}</button>`); }</script></div>
         </div>
 
-        <!-- 3번 구역 내에서 따라오는 버튼 -->
         <div class="sticky-confirm-wrap">
             <button id="lockerConfirmBtn" onclick="finalizeBooking()" class="btn-confirm-sticky bg-accent-red text-white px-12 py-5 font-black text-[12px] uppercase tracking-widest rounded-full shadow-2xl shadow-red-900/60">
                 Locker Confirmed <i class="fa-solid fa-arrow-down ml-2"></i>
@@ -222,7 +257,6 @@
         </div>
     </section>
 
-    <!-- [BOOKING] Step 4: Final Payment -->
     <section id="step4" class="px-8 md:px-20 max-w-7xl mx-auto opacity-10 transition-all duration-1000">
         <div class="payment-card p-16 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-12">
             <div class="text-center md:text-left">
@@ -234,7 +268,6 @@
         </div>
     </section>
 
-    <!-- Footer Progress Bar -->
     <footer class="fixed bottom-0 w-full z-[200] glass-panel border-t border-white/10 px-10 py-8 backdrop-blur-3xl">
         <div class="max-w-5xl mx-auto flex justify-between items-center text-[10px] tracking-[0.4em] font-black uppercase">
             <div id="prog1" class="step-active">01. Category</div>
@@ -248,7 +281,6 @@
     </footer>
 
     <script>
-        // 1. 스무스 스크롤 & 버튼 소멸
         document.querySelectorAll('.smooth-scroll').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -273,7 +305,6 @@
             }
         });
 
-        // 2. 예약 시스템 로직
         let selectedLockerName = "";
 
         function nextStep(current, next, el) {
